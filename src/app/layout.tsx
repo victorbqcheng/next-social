@@ -20,7 +20,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={inter.className}>
-          <div className="w-full bg-slate-300 px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
+          <div className="w-full px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
             <Navbar />
           </div>
           <div className=" bg-slate-100 px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
