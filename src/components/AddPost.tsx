@@ -7,9 +7,7 @@ const AddPost = () => {
       {/* AVATAR */}
       <Image src="https://images.pexels.com/photos/6062045/pexels-photo-6062045.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
         width={48} height={48} alt='avatar'
-        className='w-12 h-12 rounded-full object-cover'>
-
-      </Image>
+        className='w-12 h-12 rounded-full object-cover' />
       {/* POST */}
       <div className='flex-1'>
         {/* TEXT INPUT */}
