@@ -1,19 +1,55 @@
+
+import prisma from '@/lib/client';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { User } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
+import UserInfoCardInteraction from './UserInfoCardInteraction';
 
 type UserInfoCardProps = {
     user?:User;
 };
 
-const UserInfoCard = ({user}:UserInfoCardProps) => {
+const UserInfoCard = async ({user}:UserInfoCardProps) => {
     const createdAt = new Date(user?.createdAt!);
     const formattedDate = createdAt.toLocaleDateString("en-US", {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     });
+
+    let isUserBlocked = false;
+    let isFollowing = false;
+    let isFollowingSent = false;
+
+    const {userId:currentUserId} = auth();
+    if(currentUserId){
+        const blockRes = await prisma.blockRequest.findFirst({
+            where:{
+                senderId: currentUserId,
+                receiverId:user?.id
+            }
+        });
+        isUserBlocked = blockRes?true:false;
+
+
+        const followRes = await prisma.follower.findFirst({
+            where:{
+                followerId: currentUserId,
+                followingId:user?.id
+            }
+        });
+        isFollowing = followRes?true:false;
+
+        const followReqRes = await prisma.followRequest.findFirst({
+            where:{
+                senderId: currentUserId,
+                receiverId:user?.id
+            }
+        });
+        isFollowingSent = followReqRes?true:false;
+    }
 
     return (
         <div className='p-4 bg-white shadow-md rounded-lg text-sm'>
@@ -51,8 +87,12 @@ const UserInfoCard = ({user}:UserInfoCardProps) => {
                         <span>Joined {formattedDate}</span>
                     </div>
                 </div>
-                <button className='bg-blue-600 text-white p-2 rounded-md'>Following</button>
-                <span className='text-red-400 text-xs cursor-pointer self-end'>Block User</span>
+                <UserInfoCardInteraction userId={user?.id!} 
+                        currentUserId={currentUserId!}
+                        isUserBlocked={isUserBlocked}
+                        isFollowing={isFollowing}
+                        isFollowingSent={isFollowingSent} />
+                
             </div>
         </div>
     )
