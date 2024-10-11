@@ -5,7 +5,6 @@ import React from 'react'
 
 type UserInfoCardInteractionProps = {
     userId: string;
-    currentUserId: string;
     isUserBlocked: boolean;
     isFollowing: boolean;
     isFollowingSent: boolean;
@@ -13,7 +12,6 @@ type UserInfoCardInteractionProps = {
 
 const UserInfoCardInteraction = ({
     userId,
-    currentUserId,
     isUserBlocked,
     isFollowing,
     isFollowingSent

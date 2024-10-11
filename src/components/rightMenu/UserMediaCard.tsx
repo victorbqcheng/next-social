@@ -1,13 +1,28 @@
+import prisma from '@/lib/client';
 import { User } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
 
 type UserMediaCardProps = {
-    user?:User;
+    user?: User;
 };
 
-const UserMediaCard = ({user}:UserMediaCardProps) => {
+const UserMediaCard = async ({ user }: UserMediaCardProps) => {
+
+    const postsWithMedia = await prisma.post.findMany({
+        where: {
+            userId: user?.id,
+            img: {
+                not: null
+            }
+        },
+        take: 8,
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+
     return (
         <div className='p-4 bg-white shadow-md rounded-lg text-sm flex flex-col gap-4'>
             {/* TOP */}
@@ -17,29 +32,18 @@ const UserMediaCard = ({user}:UserMediaCardProps) => {
             </div>
             {/* BOTTOM */}
             <div className='flex justify-between flex-wrap gap-2 w-full relative'>
-                
-                <div className='w-1/5 relative h-24'>
-                    <Image src="https://images.pexels.com/photos/10509041/pexels-photo-10509041.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load" alt=''
-                           fill className='rounded-md object-cover'/>
-                </div>
-                
-                <div className='w-1/5 relative h-24'>
-                    <Image src="https://images.pexels.com/photos/10509041/pexels-photo-10509041.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load" alt=''
-                           fill className='rounded-md object-cover'/>
-                </div>
-                <div className='w-1/5 relative h-24'>
-                    <Image src="https://images.pexels.com/photos/10509041/pexels-photo-10509041.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load" alt=''
-                           fill className='rounded-md object-cover'/>
-                </div>
-                <div className='w-1/5 relative h-24'>
-                    <Image src="https://images.pexels.com/photos/10509041/pexels-photo-10509041.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load" alt=''
-                           fill className='rounded-md object-cover'/>
-                </div>
-                <div className='w-1/5 relative h-24'>
-                    <Image src="https://images.pexels.com/photos/10509041/pexels-photo-10509041.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load" alt=''
-                           fill className='rounded-md object-cover'/>
-                </div>
-                
+                {
+                    postsWithMedia.length ? postsWithMedia.map(post => (
+                        <div key={post.id} className='w-1/5 relative h-24'>
+                            <Image src={post.img!} alt=''
+                                fill className='rounded-md object-cover' />
+                        </div>
+                    )):"No media found"
+                }
+
+
+
+
             </div>
         </div>
     )
