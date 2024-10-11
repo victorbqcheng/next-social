@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
 import UserInfoCardInteraction from './UserInfoCardInteraction';
+import UpdateUser from './UpdateUser';
 
 type UserInfoCardProps = {
     user?:User;
@@ -56,7 +57,9 @@ const UserInfoCard = async ({user}:UserInfoCardProps) => {
             {/* TOP */}
             <div className='flex items-center justify-between font-medium'>
                 <span className='text-gray-500'>User Information</span>
-                <Link href='/' className='text-xs text-blue-500'>see all</Link>
+                {
+                    currentUserId===user?.id? <UpdateUser/> : <Link href='/' className='text-xs text-blue-500'>see all</Link>
+                }
             </div>
             {/* BOTTOM */}
             <div className='flex flex-col gap-4 text-gray-500'>
