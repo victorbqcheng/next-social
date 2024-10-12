@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react'
-import FriendRequests from './FriendRequests';
+import FriendRequestCard from './FriendRequestCard';
 import Birthdays from './Birthdays';
 import Ad from '../Ad';
 import UserInfoCard from './UserInfoCard';
@@ -23,7 +23,7 @@ const RightMenu = ({ user }: RightMenuProps) => {
                     </Suspense>
                 </>
             }
-            <FriendRequests />
+            <FriendRequestCard />
             <Birthdays />
             <Ad size='md' />
         </div>
