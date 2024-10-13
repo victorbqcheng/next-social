@@ -149,11 +149,17 @@ export const declineFollowRequest = async(senderId:string)=>{
     }
 };
 
-export const updateProfile = async(formData:FormData, cover:string)=>{
+export type UpdateResult = {
+    success:boolean;
+    error:boolean;
+};
+
+export const updateProfile = async(formData:FormData, cover:string):Promise<UpdateResult>=>{
 
     const {userId:currentUserId} = auth();
     if(!currentUserId) {
-        throw new Error("User is not authenticated");
+        
+        return {success:false, error:true};
     }
 
     const fields = Object.fromEntries(formData);
@@ -177,7 +183,7 @@ export const updateProfile = async(formData:FormData, cover:string)=>{
     if(!validatedFields.success){
         console.log(validatedFields.error.flatten().fieldErrors)
         // throw new Error("Invalid data");
-        return "error"
+        return {success:false, error:true};
     }
 
     try {
@@ -187,9 +193,10 @@ export const updateProfile = async(formData:FormData, cover:string)=>{
             },
             data: validatedFields.data
         });
+        return {success:true, error:false};
     } catch (error) {
         console.log(error);
-        throw new Error("Something went wrong");
         
+        return {success:false, error:true};
     }
 };

@@ -1,9 +1,10 @@
 "use client"
 
-import { updateProfile } from '@/lib/actions';
+import { updateProfile, UpdateResult } from '@/lib/actions';
 import { User } from '@prisma/client';
 import { CldUploadWidget, CloudinaryUploadWidgetInfo } from 'next-cloudinary';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import React from 'react'
 
 type UpdateUserProps = {
@@ -13,9 +14,12 @@ type UpdateUserProps = {
 const UpdateUser = ({ user }: UpdateUserProps) => {
     const [open, setOpen] = React.useState(false);
     const [cover, setCover] = React.useState<any>();
+    const [updateState, setUpdateState] = React.useState<UpdateResult>({ success: false, error: false });
+    const router = useRouter();
 
     const handleCloseOverlay = () => {
         setOpen(false);
+        updateState.success && router.refresh();
     };
 
     return (
@@ -24,7 +28,7 @@ const UpdateUser = ({ user }: UpdateUserProps) => {
             {/* overlay */}
             {open && <div className='absolute w-full h-full left-0 top-0 bg-black bg-opacity-65 flex justify-center items-center z-50'>
 
-                <form action={(formData)=>updateProfile(formData, cover?.secure_url)} className='flex flex-col gap-2 bg-white rounded-md shadow-md w-full md:w-1/2 xl:w-1/3 p-12 relative'>
+                <form action={(formData)=>updateProfile(formData, cover?.secure_url||"").then((s)=>setUpdateState(s))} className='flex flex-col gap-2 bg-white rounded-md shadow-md w-full md:w-1/2 xl:w-1/3 p-12 relative'>
                     {/* close button */}
                     <div className='absolute top-3 right-3 cursor-pointer text-xl' onClick={handleCloseOverlay}>X</div>
                     <h1>Update Profile</h1>
@@ -76,6 +80,12 @@ const UpdateUser = ({ user }: UpdateUserProps) => {
                             <input name='website' type="text" placeholder={user.webset || ""} className='border border-gray-200 p-2 rounded-md text-sm' />
                         </div>
                     </div>
+                    {
+                        updateState.success && <span className='text-green-500'>Profile updated successfully</span>
+                    }
+                    {
+                        updateState.error && <span className='text-red-500'>Something went wrong</span>
+                    }
                     <button className='bg-blue-500 text-white rounded-md p-2 mt-2'>Update</button>
                 </form>
             </div>}
