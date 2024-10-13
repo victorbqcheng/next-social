@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import prisma from "./client";
+import { z } from "zod";
 
 export const switchFollow = async(userId:string)=>{
 
@@ -128,7 +129,7 @@ export const declineFollowRequest = async(senderId:string)=>{
     }
     try {
         
-        const existingFollowRequest = prisma.followRequest.findFirst({
+        const existingFollowRequest = await prisma.followRequest.findFirst({
             where:{
                 senderId,
                 receiverId: currentUserId
@@ -146,5 +147,49 @@ export const declineFollowRequest = async(senderId:string)=>{
         console.log(error);
         throw new Error("Something went wrong");
     }
+};
 
+export const updateProfile = async(formData:FormData)=>{
+
+    const {userId:currentUserId} = auth();
+    if(!currentUserId) {
+        throw new Error("User is not authenticated");
+    }
+
+    const fields = Object.fromEntries(formData);
+    
+    // const filteredFields = Object.fromEntries(Object.entries(fields).filter(([_, value])=>value !== ""));
+    const filteredFields = Object.fromEntries(Array.from(formData.entries()).filter(([_, value])=>value !== ""));
+    
+
+    const Profile = z.object({
+        cover: z.string().optional(),
+        name: z.string().max(60).optional(),
+        surname: z.string().max(60).optional(),
+        description: z.string().max(255).optional(),
+        city: z.string().max(60).optional(),
+        school: z.string().max(60).optional(),
+        work: z.string().max(60).optional(),
+        webset: z.string().max(60).optional(),
+    });
+
+    const validatedFields = Profile.safeParse(filteredFields);
+    if(!validatedFields.success){
+        console.log(validatedFields.error.flatten().fieldErrors)
+        // throw new Error("Invalid data");
+        return "error"
+    }
+
+    try {
+        await prisma.user.update({
+            where:{
+                id: currentUserId
+            },
+            data: validatedFields.data
+        });
+    } catch (error) {
+        console.log(error);
+        throw new Error("Something went wrong");
+        
+    }
 };
