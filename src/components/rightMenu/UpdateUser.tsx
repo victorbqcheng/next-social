@@ -6,6 +6,7 @@ import { CldUploadWidget, CloudinaryUploadWidgetInfo } from 'next-cloudinary';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React from 'react'
+import UpdateButton from './UpdateButton';
 
 type UpdateUserProps = {
     user: User;
@@ -20,6 +21,7 @@ const UpdateUser = ({ user }: UpdateUserProps) => {
     const handleCloseOverlay = () => {
         setOpen(false);
         updateState.success && router.refresh();
+        setUpdateState({ success: false, error: false });
     };
 
     return (
@@ -86,7 +88,7 @@ const UpdateUser = ({ user }: UpdateUserProps) => {
                     {
                         updateState.error && <span className='text-red-500'>Something went wrong</span>
                     }
-                    <button className='bg-blue-500 text-white rounded-md p-2 mt-2'>Update</button>
+                    <UpdateButton />
                 </form>
             </div>}
         </div>
