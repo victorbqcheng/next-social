@@ -200,3 +200,39 @@ export const updateProfile = async(formData:FormData, cover:string):Promise<Upda
         return {success:false, error:true};
     }
 };
+
+
+export const switchPostLike = async(postId:number)=>{
+
+    const {userId} = auth();
+    if(!userId) {
+        throw new Error("User is not authenticated");
+    }
+
+    try {
+        const existingLike = await prisma.postLike.findFirst({
+            where:{
+                userId,
+                postId
+            }
+        });
+        if(existingLike){
+            await prisma.postLike.delete({
+                where:{
+                    id: existingLike.id
+                }
+            });
+        }else{
+            await prisma.postLike.create({
+                data:{
+                    userId,
+                    postId
+                }
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        throw new Error("Something went wrong");
+    }
+};
+
