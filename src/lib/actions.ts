@@ -236,3 +236,35 @@ export const switchPostLike = async(postId:number)=>{
     }
 };
 
+export const addComment = async(postId:number, desc:string)=>{
+
+    const {userId:currentUserId} = auth();
+    if(!currentUserId) {
+        throw new Error("User is not authenticated");
+    }
+
+    try {
+        
+        const createdComment = await prisma.comment.create({
+            data:{
+                userId:currentUserId,
+                postId,
+                desc
+            },
+            include:{
+                user:true
+            }
+        });
+        return createdComment;
+    } catch (error) {
+        console.log(error);
+        throw new Error("Something went wrong");
+        
+    }
+
+};
+
+export const addPost = async(formData:FormData, img:string)=>{
+
+};
+
