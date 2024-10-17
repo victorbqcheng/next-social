@@ -1,9 +1,10 @@
 import Image from 'next/image'
-import React from 'react'
+import React, { Suspense } from 'react'
 import Comments from './Comments'
 import { Post as PostModel, User } from '@prisma/client';
 import { GetNameFromUser } from '@/lib/util';
 import PostInteractions from './PostInteractions';
+import PostMoreInteraction from './PostMoreInteraction';
 
 export type PostWithLikesAndComments = PostModel & {
     user: User
@@ -29,7 +30,7 @@ const Post = ({ post }: PostProps) => {
                         alt="user" width={40} height={40} className='w-10 h-10 rounded-full' />
                     <span className='font-medium'>{GetNameFromUser(post.user)}</span>
                 </div>
-                <Image src="/more.png" alt='more' width={16} height={16} className='cursor-pointer' />
+                <PostMoreInteraction post={post}/>
             </div>
             {/* DESCRIPTION */}
             <div className='flex flex-col gap-4'>
@@ -44,9 +45,13 @@ const Post = ({ post }: PostProps) => {
                 </p>
             </div>
             {/* INTERACTION */}
-            <PostInteractions postId={post.id} likes={post.likes} commentNumber={post._count.comments}/>
+            <Suspense fallback={<div>Loading...</div>}>
+                <PostInteractions postId={post.id} likes={post.likes} commentNumber={post._count.comments} />
+            </Suspense>
             {/* COMMENTS */}
-            <Comments postId={post.id}/>
+            <Suspense fallback={<div>Loading...</div>}>
+                <Comments postId={post.id} />
+            </Suspense>
         </div>
     )
 }
