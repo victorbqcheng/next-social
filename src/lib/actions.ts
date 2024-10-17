@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "./client";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 export const switchFollow = async(userId:string)=>{
 
@@ -265,6 +266,32 @@ export const addComment = async(postId:number, desc:string)=>{
 };
 
 export const addPost = async(formData:FormData, img:string)=>{
+    const {userId:currentUserId} = auth();
+    if(!currentUserId) {
+        throw new Error("User is not authenticated");
+    }
+
+    const desc = formData.get("desc") as string;
+    const validatedDesc = z.string().min(1).max(255).safeParse(desc);
+    if(!validatedDesc.success){
+        console.log("Invalid desc");
+        return;
+    }
+
+    try {
+        await prisma.post.create({
+            data:{
+                userId:currentUserId,
+                desc:validatedDesc.data,
+                img
+            }
+        });
+        
+        revalidatePath("/");
+
+    } catch (error) {
+        
+    }
 
 };
 
