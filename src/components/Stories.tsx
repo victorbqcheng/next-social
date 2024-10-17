@@ -1,48 +1,49 @@
-"use client"
-import Image from 'next/image'
+
+import prisma from '@/lib/client';
+import { auth } from '@clerk/nextjs/server';
 import React from 'react'
+import StoryList from './StoryList';
 
-const storyData = [
-  {
-    name: 'Lula',
-    imgUrl: 'https://images.pexels.com/photos/28483666/pexels-photo-28483666/free-photo-of-snail-on-dry-branch-in-natural-setting.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load'
-  },
-  {
-    name: 'Lula',
-    imgUrl: 'https://images.pexels.com/photos/28483666/pexels-photo-28483666/free-photo-of-snail-on-dry-branch-in-natural-setting.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load'
-  },
-  {
-    name: 'Lula',
-    imgUrl: 'https://images.pexels.com/photos/28483666/pexels-photo-28483666/free-photo-of-snail-on-dry-branch-in-natural-setting.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load'
-  },
-  {
-    name: 'Lula',
-    imgUrl: 'https://images.pexels.com/photos/28483666/pexels-photo-28483666/free-photo-of-snail-on-dry-branch-in-natural-setting.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load'
-  },
-  {
-    name: 'Lula',
-    imgUrl: 'https://images.pexels.com/photos/28483666/pexels-photo-28483666/free-photo-of-snail-on-dry-branch-in-natural-setting.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load'
-  },
-];
+type StorriesProps = {
+    
+};
 
-const Stories = () => {
-  return (
-    <div className='p-4 bg-white rounded-lg shadow-md overflow-scroll text-xs scrollbar-hide'>
-      <div className='flex gap-8 w-max'>
-        {
-          storyData.map((story, index) => (
-            <div key={index}>
-              <div className='flex flex-col gap-2 items-center cursor-pointer'>
-                <Image src={story.imgUrl}
-                  alt='story' width={80} height={80} className='w-20 h-20 rounded-full ring-2' />
-                <span>{story.name}</span>
-              </div>
-            </div>
-          ))
+const Stories = async ({}:StorriesProps) => {
+    const { userId: currentUserId } = auth();
+    if(!currentUserId) return null;
+
+    const following = await prisma.follower.findMany({
+        where: {
+            followerId: currentUserId
+        },
+        select: {
+            followingId: true
         }
-      </div>
-    </div>
-  )
+    });
+    // console.log("following:",following);
+    const followingIds = following.map(f => f.followingId);
+    const ids = [...followingIds, currentUserId];
+
+
+    const stories = await prisma.story.findMany({
+        where:{
+            userId:{
+                in: ids
+            },
+            expiresAt:{
+                gt: new Date()
+            }
+        },
+        include:{
+            user:true
+        }
+    });
+
+    return (
+        <div className='p-4 bg-white rounded-lg shadow-md overflow-scroll text-xs scrollbar-hide'>
+            <StoryList stories={stories} />
+        </div>
+    )
 }
 
 export default Stories
